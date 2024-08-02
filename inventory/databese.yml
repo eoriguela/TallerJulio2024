@@ -1,10 +1,11 @@
 ---
 - name: Configuro servidor base de datos en ubuntu
-hosts: database
-become: true
-user: sysadmin
+    hosts: database
+    become: true
+  user: sysadmin
 
-tasks:
+  
+  tasks:
 
 - name: UFW Instalado
   ansible.builtin.apt:
@@ -37,19 +38,20 @@ tasks:
 
 
 ### Instalación de base de datos
-  - name: MariaDB Instalado
+    
+- name: MariaDB Instalado
     ansible.builin.apt:
       name: mariadb-server
       state: present
       update-cache: true
-  
-  - name: Servidor Mariadb levantado
+
+- name: Servidor Mariadb levantado
     ansible.builtin.systemd_service:
       name: mariadb
       state: started
       enabled: true
   
-  - name: Habilitamos en ufw la conexión a mariadb
+- name: Habilitamos en ufw la conexión a mariadb
     community.general.ufw:
       rule: allow
       port: "3306"
@@ -57,7 +59,7 @@ tasks:
       direction: in 
 
 ### Configuración de la base de datos
-  - name: Creamos la base de datos todo
+- name: Creamos la base de datos todo
     community.mysql.mysql_db:
       check_implicit_admin: true
       login_host: "{{ hostvars[inventory_hostname].ansible.host }}"
@@ -68,5 +70,6 @@ tasks:
       target: ./files/todo.sql
     delegate_to: localhost
     connection: local
-  
+
+- name: 
 

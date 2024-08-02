@@ -1,0 +1,51 @@
+---
+
+- name: Instalar y configurar un webserver
+  hosts: centos
+  become: true
+  user: sysadmin
+
+  tasks:
+
+  - name: Instalar apache
+    ansible.builtin.dnf:
+      name: httpd
+      state: present
+
+  - name: Configurar virtualhost
+    ansible.builtin.copy: 
+      src: ./files/virtualhost.conf
+      dest: /etc/httpd/conf.d
+    notify: Reiniciar apache
+
+  - name: Crear directorio document root
+    ansible.builtin.file:
+      path: /var/www/todo/html
+      state: directory
+      mode: '0755'
+      owner: apache
+      group: apache
+
+
+  - name: Permito conexiones al puerto 80
+    ansible.posix.firewalld:
+      service: "{{ item }}"
+      state: enabled
+      immediate: true
+      permanent: true
+    loop: 
+      - http
+      - https
+
+  - name: Apache levantado y habilitado
+    ansible.builtin.systemd_service:
+      name: httpd
+      state: started
+      enabled: true
+
+  handlers:
+
+  - name: Reiniciar apache
+    ansible.builtin.systemd_service:
+      name: httpd
+      state: restarted
