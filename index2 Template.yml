@@ -1,8 +1,0 @@
-<html> 
-  <head>
-    <title Pagina Web de ejemplo </title>
-  </head>
-  <body>
-    <hl> Servidor {{ ansible_hostanme }}  </hl>
-    </p> Hoy es {{ ansible_date_time.weekday }} {{ ansible_date_time.day }}
-    

@@ -16,6 +16,31 @@
         name: podman
         state: present
 
+    - name: Crear grupo Tomcat si no existe
+      ansible.builtin.group:
+        name: tomcat
+        state: present
+
+    - name: Crear usuario Tomcat si no existe
+      ansible.builtin.user:
+        name: tomcat
+        comment: "Tomcat User"
+        home: /opt/tomcat
+        shell: /bin/nologin
+        group: tomcat
+        state: present
+   
+    - name: Asignar permisos correctos al directorio de Tomcat
+      ansible.builtin.command:
+        cmd: chown -R tomcat:tomcat /opt/tomcat
+
+    - name: Crear directorio para Tomcat
+      ansible.builtin.file:
+        path: /opt/tomcat
+        state: directory
+        owner: tomcat
+        group: tomcat
+        mode: '0755'
 
     - name: Crear directorio para clonar el repositorio
       ansible.builtin.file:
@@ -41,8 +66,37 @@
         dest: /opt/tomcat
         remote_src: yes
 
+    - name: Asignar permisos correctos al directorio de Tomcat
+      ansible.builtin.command:
+        cmd: chown -R tomcat:tomcat /opt/tomcat
+    
+    - name: Configurar Tomcat como servicio           ### Prompt de chatgpt como configurar tomcat como servicio
+      copy:
+        dest: /etc/systemd/system/tomcat.service
+        content: |
+          [Unit]
+          Description=Apache Tomcat Web Application Container
+          After=network.target
+
+          [Service]
+          Type=forking
+          User=tomcat
+          Group=tomcat
+          Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk"
+          Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom"
+          ExecStart=/opt/tomcat/apache-tomcat-9.0.91/bin/startup.sh
+          ExecStop=/opt/tomcat/apache-tomcat-9.0.91/bin/shutdown.sh
+          SuccessExitStatus=143
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Recargar demonio systemd
+      command: systemctl daemon-reload
+    
     - name: Habilitar y arrancar servicio Tomcat
-      ansible.builtin.systemd_service:
+      ansible.builtin.systemd:
         name: tomcat
         enabled: yes
         state: started
@@ -57,11 +111,6 @@
         src: /tomcat/todo.war
         dest: /opt/tomcat/webapps/
 
-    - name: Desplegar ConteinerFile
-      ansible.builtin.copy:
-        src: /tomcat/Containerfile
-        dest: /opt/tomcat/webapps/
-
     - name: Habilitar puertos en el Firewall
       ansible.posix.firewalld:
         port: 8080/tcp
@@ -71,12 +120,3 @@
     - name: Recargar Firewall
       ansible.builtin.command:
         cmd: firewall-cmd --reload
-
-    - name: Construir imagen de contenedor Tomcat
-      ansible.builtin.command:
-         cmd: podman build -t tomcat-demo:1 /opt/tomcat/webapps
-         chdir: /opt/tomcat
-
-    - name: Ejecutar contenedor Tomcat
-      ansible.builtin.command:
-        cmd: podman run -p 8008:8080 --name demo1 tomcat-demo:1

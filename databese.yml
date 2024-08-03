@@ -1,10 +1,9 @@
 ---
 - name: Configuro servidor base de datos en ubuntu
-    hosts: database
-    become: true
+  hosts: database
+  become: true
   user: sysadmin
 
-  
   tasks:
 
 - name: UFW Instalado
