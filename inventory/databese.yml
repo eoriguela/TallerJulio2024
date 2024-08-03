@@ -40,19 +40,19 @@
 ### Instalación de base de datos
     
 - name: MariaDB Instalado
-    ansible.builin.apt:
+  ansible.builin.apt:
       name: mariadb-server
       state: present
       update-cache: true
 
 - name: Servidor Mariadb levantado
-    ansible.builtin.systemd_service:
+  ansible.builtin.systemd_service:
       name: mariadb
       state: started
       enabled: true
   
 - name: Habilitamos en ufw la conexión a mariadb
-    community.general.ufw:
+  community.general.ufw:
       rule: allow
       port: "3306"
       protocol: tcp
@@ -60,7 +60,7 @@
 
 ### Configuración de la base de datos
 - name: Creamos la base de datos todo
-    community.mysql.mysql_db:
+  community.mysql.mysql_db:
       check_implicit_admin: true
       login_host: "{{ hostvars[inventory_hostname].ansible.host }}"
       login_user: root
@@ -68,8 +68,7 @@
       name: todo
       state: present
       target: ./files/todo.sql
-    delegate_to: localhost
-    connection: local
+  delegate_to: localhost
+  connection: local
 
-- name: 
 
