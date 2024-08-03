@@ -1,0 +1,82 @@
+---
+- name: Despliegue de aplicacion ToDo
+  hosts: centos
+  become: true
+  user: sysadmin
+
+  tasks:
+
+    - name: Instalar JDK de java
+      ansible.builtin.dnf: 
+        name: java-11-openjdk-devel
+        state: present
+
+    - name: Instalar Podman
+      ansible.builtin.dnf:
+        name: podman
+        state: present
+
+
+    - name: Crear directorio para clonar el repositorio
+      ansible.builtin.file:
+        path: /tomcat
+        state: directory
+
+    - name: Crear directorio para Tomcat
+      ansible.builtin.file:
+        path: /opt/tomcat
+        state: directory
+        owner: sysadmin
+        group: sysadmin
+        mode: '0755'
+
+    - name: Descargar Apache Tomcat
+      ansible.builtin.get_url:
+        url: https://downloads.apache.org/tomcat/tomcat-9/v9.0.91/bin/apache-tomcat-9.0.91.tar.gz
+        dest: /opt/tomcat
+
+    - name: Extraer Apache Tomcat
+      ansible.builtin.unarchive:
+        src: /opt/tomcat/apache-tomcat-9.0.91.tar.gz
+        dest: /opt/tomcat
+        remote_src: yes
+
+    - name: Habilitar y arrancar servicio Tomcat
+      ansible.builtin.systemd_service:
+        name: tomcat
+        enabled: yes
+        state: started
+
+    - name: Clonar aplicación
+      ansible.builtin.git:
+        repo: "https://github.com/eoriguela/Tomcat-Todo.git"
+        dest: /tomcat
+
+    - name: Desplegar aplicación ToDo
+      ansible.builtin.copy:
+        src: /tomcat/todo.war
+        dest: /opt/tomcat/webapps/
+
+    - name: Desplegar ConteinerFile
+      ansible.builtin.copy:
+        src: /tomcat/Containerfile
+        dest: /opt/tomcat/webapps/
+
+    - name: Habilitar puertos en el Firewall
+      ansible.posix.firewalld:
+        port: 8080/tcp
+        permanent: yes
+        state: enabled
+
+    - name: Recargar Firewall
+      ansible.builtin.command:
+        cmd: firewall-cmd --reload
+
+    - name: Construir imagen de contenedor Tomcat
+      ansible.builtin.command:
+         cmd: podman build -t tomcat-demo:1 /opt/tomcat/webapps
+         chdir: /opt/tomcat
+
+    - name: Ejecutar contenedor Tomcat
+      ansible.builtin.command:
+        cmd: podman run -p 8008:8080 --name demo1 tomcat-demo:1
