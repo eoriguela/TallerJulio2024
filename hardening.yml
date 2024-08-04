@@ -14,10 +14,6 @@
     notify: Reinicio servidor SSH
     register: results_sshd
 
-  - name: Ver resultado de tarea anterior
-    ansible.builtin.debug: 
-      var: results_sshd
- 
  
   handlers: 
 
