@@ -64,32 +64,22 @@
         port: "3306"
         protocol: tcp
         direction: in
-    
- #   - name: Permitir conexiones remotas para root
- #     community.mysql.mysql_user:
- #      name: root
- #       host: '%'
- #       password: dbadmin
- #       priv: '*.*:ALL'
- #       state: present
- #       login_host: 127.0.0.1
- #       login_user: root
- #       login_password: dbadmin
+     
 
     ### Configuración de la base de datos
-    - name: Creamos la base de datos todo         
+    - name: Creamos la base de datos todo
       community.mysql.mysql_db:
         check_implicit_admin: true
-        login_host: "{{ hostvars[inventory_hostname].ansible_host }}"
+        login_host: 127.0.0.1
         login_user: root
-        login_password: 
+        login_password: 'tlxroot'
         name: todo
         state: present
         target: ./files/todo.sql
-      delegate_to: localhost
 
   handlers:
     - name: Restart mariadb
       ansible.builtin.systemd:
         name: mariadb
         state: restarted
+
