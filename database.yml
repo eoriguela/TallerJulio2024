@@ -77,6 +77,12 @@
         state: present
         target: ./files/todo.sql
 
+    - name: Configurar virtualhost
+      ansible.builtin.copy: 
+      src: ./files/virtualhost.conf
+      dest: /etc/httpd/conf.d
+       
+
   handlers:
     - name: Restart mariadb
       ansible.builtin.systemd:

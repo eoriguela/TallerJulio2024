@@ -62,7 +62,7 @@
       ansible.builtin.command:
         cmd: chown -R tomcat:tomcat /opt/tomcat
     
-    - name: Configurar Tomcat como servicio           ### Prompt de chatgpt como configurar tomcat como servicio
+    - name: Configurar Tomcat como servicio           ### Prompt de chatgpt "configuración tomcat como servicio"
       copy:
         dest: /etc/systemd/system/tomcat.service
         content: |
@@ -101,7 +101,7 @@
     - name: Desplegar aplicación ToDo
       ansible.builtin.copy:
         src: /tomcat/todo.war
-        dest: /opt/tomcat/webapps/
+        dest: /opt/tomcat/webapps/todo.war
 
     - name: Habilitar puertos en el Firewall
       ansible.posix.firewalld:
