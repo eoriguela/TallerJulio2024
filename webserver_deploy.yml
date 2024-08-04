@@ -47,14 +47,6 @@
         path: /tomcat
         state: directory
 
-    - name: Crear directorio para Tomcat
-      ansible.builtin.file:
-        path: /opt/tomcat
-        state: directory
-        owner: sysadmin
-        group: sysadmin
-        mode: '0755'
-
     - name: Descargar Apache Tomcat
       ansible.builtin.get_url:
         url: https://downloads.apache.org/tomcat/tomcat-9/v9.0.91/bin/apache-tomcat-9.0.91.tar.gz
