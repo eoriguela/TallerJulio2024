@@ -64,28 +64,22 @@
         port: "3306"
         protocol: tcp
         direction: in
-     
+  
 
     ### Configuración de la base de datos
-    - name: Creamos la base de datos todo
+    - name: Creamos la base de datos todo         
       community.mysql.mysql_db:
         check_implicit_admin: true
-        login_host: 127.0.0.1
+        login_host: 192.168.56.111
         login_user: root
         login_password: 'tlxroot'
         name: todo
         state: present
         target: ./files/todo.sql
-
-    - name: Configurar virtualhost
-      ansible.builtin.copy: 
-      src: ./files/virtualhost.conf
-      dest: /etc/httpd/conf.d
-       
+      delegate_to: localhost
 
   handlers:
     - name: Restart mariadb
       ansible.builtin.systemd:
         name: mariadb
         state: restarted
-
